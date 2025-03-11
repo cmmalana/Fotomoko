@@ -27,7 +27,7 @@ public class SettingsData
 public class WebCamTex : MonoBehaviour
 {
 	SettingsData settingsData;
-	WebCamTexture backCam;
+	public WebCamTexture backCam;
 
 	// mag input ng number = 0, 1, etc. para mahanap ung Snap Camera
 	// karaniwan 0 = webcam, 1 = snapcamera
@@ -54,6 +54,7 @@ public class WebCamTex : MonoBehaviour
 	public Dropdown QRDropDown;
 	public Button Print;
 	public Dropdown PrintButtonStatus;
+	public GameObject WebCamDuplicate;
 	
 	string saveFilePath;
 	
@@ -118,18 +119,21 @@ public class WebCamTex : MonoBehaviour
 		//Debug.Log(CamDropdown.value);
 		if (CamPosDropdown.value == 0){
 			transform.rotation = Quaternion.Euler(0, 180, 90);
+			WebCamDuplicate.transform.rotation = Quaternion.Euler(0, 180, 90);
 			MiniCam.transform.rotation = Quaternion.Euler(0, 180, 90);
 			Cam2WithFrame.transform.rotation = Quaternion.Euler(0, 180, 90);
 			//transform.localScale = new Vector3(1920,  1080, -10);
 			//Cam2WithFrame.transform.localScale = new Vector3(1459.2f,  820.8f, -10);
 		}else if(CamPosDropdown.value == 1){
 			transform.rotation = Quaternion.Euler(0, 180, 270);
+			WebCamDuplicate.transform.rotation = Quaternion.Euler(0, 180, 270);
 			MiniCam.transform.rotation = Quaternion.Euler(0, 180, 270);
 			Cam2WithFrame.transform.rotation = Quaternion.Euler(0, 180, 270);
 			//transform.localScale = new Vector3(1920,  1080, -10);
 			//Cam2WithFrame.transform.localScale = new Vector3(1459.2f,  820.8f, -10);
 		} else {
 			transform.rotation = Quaternion.Euler(0, 180, 0);
+			WebCamDuplicate.transform.rotation = Quaternion.Euler(0, 180, 0);
 			//transform.localScale = new Vector3(3456,  1944, -10);
 			//MiniCam.transform.rotation = Quaternion.Euler(0, 180, 0);
 			Cam2WithFrame.transform.rotation = Quaternion.Euler(0, 180, 0);

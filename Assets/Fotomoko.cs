@@ -23,6 +23,7 @@ using System.Data;
 public class DataSettings{
 	public int capturetimervalue;
 	public int cammirrorvalue;
+	public int collagevalue;
 }
 
 
@@ -124,6 +125,17 @@ public class Fotomoko : MonoBehaviour
 	public Dropdown CaptureTimer;
 	string saveFilePath;
 	public Dropdown CamMirror;
+	public GameObject WebCamDuplicate;
+	public Dropdown Collage;
+	private Animator webcamduplicate;
+	private string webcameduplicateanimation;
+	public GameObject CollageLayout;
+	public Canvas Collage4x4;
+	private Image[] CollageImages;
+	string collagepath;
+	private Animator CollageLayoutAnimation;
+	private string CollageLayouts;
+	private int count = 0;
 
 	void Awake()
 	{
@@ -170,6 +182,9 @@ public class Fotomoko : MonoBehaviour
 		string pat = Path.Combine(frame_pat, "fotomokosettings.json");
 		saveFilePath = pat;
 
+		CollageImages = Collage4x4.GetComponentsInChildren<Image>();
+		collagepath = Path.Combine(Directory.GetCurrentDirectory(), "CollageImages");
+
 		LoadConfig();
 
 
@@ -183,11 +198,13 @@ public class Fotomoko : MonoBehaviour
 
 	public void LoadConfig(){
 		if (File.Exists(saveFilePath)){
+			Directory.CreateDirectory(collagepath);
 			string loadSettingsData = File.ReadAllText(saveFilePath);
 			datasettings = JsonUtility.FromJson<DataSettings>(loadSettingsData);
 
 			CaptureTimer.value = datasettings.capturetimervalue;
 			CamMirror.value = datasettings.cammirrorvalue;
+			Collage.value = datasettings.collagevalue;
 		}
 		else{
 			SaveConfig();
@@ -197,8 +214,11 @@ public class Fotomoko : MonoBehaviour
 	public void SaveConfig(){
 		string savedatasettings = JsonUtility.ToJson(datasettings);
         File.WriteAllText(saveFilePath, savedatasettings);
+		
 		Debug.Log("FOTOMOKO SETTINGS CONFIG");
         Debug.Log("Save file created at: " + saveFilePath + " Settings Data: "+ savedatasettings);
+
+		Directory.CreateDirectory(collagepath);
 	}
 	
 	void resetSettings(){
@@ -378,7 +398,7 @@ public class Fotomoko : MonoBehaviour
 	}
 	
 	
-	// start timer after mab click ng buttons
+	// start timer after mag click ng buttons
 	// call on UIChroma.cs
 	public void onTimerStart(){
 		TextAnim.SetTrigger("TimerStart");
@@ -421,10 +441,65 @@ public class Fotomoko : MonoBehaviour
 		// if (isVid == true){
 			// VIDEOCAPTURE.StartVideoCaptureTest();
 		// }
-		onCamCapture1();
+		// onCamCapture1();
+		CaptureFunction();
 		
 		
 	}
+
+	public void CaptureFunction(){
+		datasettings.collagevalue = Collage.value;
+
+		// 1x1
+		if (datasettings.collagevalue == 0){
+			onCamCapture1();
+		} //4x4
+		else if (datasettings.collagevalue == 1){
+			// BgImage.gameObject.SetActive(false);
+			StartCoroutine(CaptureRoutine());
+			
+			// string num = count.ToString();
+			// WebCamDuplicateCapture(num);
+			
+			onCamCapture1();
+		}
+	}
+
+	private IEnumerator CaptureRoutine()
+	{
+		count = 0; // Reset count if needed
+		yield return StartCoroutine(onTimeMultiple()); // Wait for all captures
+		CollageLayout4x4(); // Build collage after all captures
+	}
+
+	IEnumerator onTimeMultiple()
+	{
+		int numCaptures = 4;
+		for (int i = 0; i < numCaptures; i++)
+		{
+			// Play capture animation and wait
+			CanvasAnim.Play("CollageCapture");
+			yield return new WaitForSeconds(1f); // Adjust based on animation length
+
+			// Determine timer duration from settings
+			int timerDuration = (datasettings.capturetimervalue == 0) ? 5 : 3;
+
+			// Timer countdown
+			for (int j = timerDuration; j > 0; j--)
+			{
+				TimerText.text = j.ToString();
+				yield return new WaitForSeconds(1f);
+			}
+			TimerText.text = ""; // Clear timer
+
+			// Capture image
+			string num = (i + 1).ToString();
+			WebCamDuplicateCapture(num);
+
+			yield return new WaitForSeconds(0.5f); // Brief pause between captures
+		}
+	}
+
 
 	public void CaptureTimerValue(){
 		datasettings.capturetimervalue = CaptureTimer.value;
@@ -557,7 +632,9 @@ public class Fotomoko : MonoBehaviour
 			isMirror = true;
 			// Get the transform and its current scale.
 			Transform camTransform = WebCam_Texture.transform;
+			Transform camTransform1 = WebCamDuplicate.transform;
 			Vector3 sc = camTransform.localScale;
+			Vector3 sc1 = camTransform1.localScale;
 			
 			// Use localEulerAngles to reliably check the rotation around the z-axis.
 			float zAngle = camTransform.localEulerAngles.z;
@@ -565,18 +642,23 @@ public class Fotomoko : MonoBehaviour
 			// If the z rotation is approximately 0, flip the x axis.
 			if (Mathf.Approximately(zAngle, 0f)) {
 				sc.x = (sc.x > 0) ? -Mathf.Abs(sc.x) : Mathf.Abs(sc.x);
+				sc1.x = (sc1.x > 0) ? -Mathf.Abs(sc.x) : Mathf.Abs(sc1.x);
 				// Ensure y remains positive so it doesn't flip vertically.
 				sc.y = Mathf.Abs(sc.y);
+				sc1.y = Mathf.Abs(sc1.y);
 			} 
 			// Otherwise, flip the y axis.
 			else {
 				sc.y = (sc.y > 0) ? -Mathf.Abs(sc.y) : Mathf.Abs(sc.y);
+				sc1.y = (sc1.y > 0) ? -Mathf.Abs(sc1.y) : Mathf.Abs(sc1.y);
 				// Ensure x remains positive so it doesn't flip horizontally.
 				sc.x = Mathf.Abs(sc.x);
+				sc1.x = Mathf.Abs(sc1.x);
 			}
 			
 			// Apply the modified scale back to the transform.
 			camTransform.localScale = sc;
+			camTransform1.localScale = sc1;
 		}
 		else{
 			
@@ -588,11 +670,163 @@ public class Fotomoko : MonoBehaviour
 
 	public void MirrorCamReset(){
 		var sc = WebCam_Texture.transform.localScale;
+		var sc1 = WebCamDuplicate.transform.localScale;
 		sc.x = 1920;
 		sc.y = 1080;
+		sc1.x = 1920;
+		sc1.y = 1080;
 		WebCam_Texture.transform.localScale = sc;
+		WebCamDuplicate.transform.localScale = sc1;
+	}
+
+	public void CollageFunction(){
+		webcamduplicate = WebCamDuplicate.GetComponent<Animator>();
+		CollageLayoutAnimation = CollageLayout.GetComponent<Animator>();
+		datasettings.collagevalue = Collage.value;
+
+		WebCam_Texture.SetActive(true);
+		WebCamDuplicate.SetActive(true);
+
+		// 1x1
+		if (datasettings.collagevalue == 0){
+			webcameduplicateanimation = "CollageDuplicateDisableAnimation";
+			CollageLayouts = "CollageLayout";
+			CollageLayoutAnimation.Play(CollageLayouts);
+
+		}
+		// 4x4
+		else if (datasettings.collagevalue == 1){
+			webcameduplicateanimation = "CollageDuplicateAnimation";
+			CollageLayouts = "Collage4x4";
+			//CollageLayout4x4();
+		}
+		else{
+			webcameduplicateanimation = "CollageDuplicateInitialAnimation";
+		}
+		// webcamduplicate.Play(webcameduplicateanimation);
+		// SaveConfig();
+	}
+
+	public void CollageLayout4x4(){
+		CollageImages[0].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture1.png"));
+		CollageImages[1].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture2.png"));
+		CollageImages[2].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture3.png"));
+		CollageImages[3].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture4.png"));
+
+		// CollageLayoutAnimation.Play(CollageLayouts);
+		// WebCam_Texture.SetActive(false); // Disable Main Cam
+		// WebCamDuplicate.SetActive(false); // Disable Duplicate Cam
+	}
+
+	Sprite LoadSpriteFromPath(string path)
+    {
+        if (File.Exists(path))
+        {
+            byte[] fileData = File.ReadAllBytes(path);
+            Texture2D texture = new Texture2D(2, 2);
+            texture.LoadImage(fileData);
+            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        }
+        else
+        {
+            Debug.LogError($"File at {path} not found.");
+            return null;
+        }
+    }
+
+	public void WebCamDuplicateCapture(string num){
+        if (WebCamDuplicate == null)
+        {
+            Debug.LogError("WebCamDuplicate GameObject is not assigned.");
+            return;
+        }
+
+        // Try to get the RawImage or Renderer component from WebCamDuplicate
+        RawImage duplicateRawImage = WebCamDuplicate.GetComponent<RawImage>();
+        Renderer duplicateRenderer = WebCamDuplicate.GetComponent<Renderer>();
+
+        Texture textureToCapture = null;
+
+        if (duplicateRawImage != null)
+        {
+            textureToCapture = duplicateRawImage.texture; // Use RawImage texture
+        }
+        else if (duplicateRenderer != null)
+        {
+            textureToCapture = duplicateRenderer.material.mainTexture; // Use Renderer texture
+        }
+
+        if (textureToCapture is WebCamTexture webcamTexture)
+        {
+			string filename = "Picture" + num + ".png";
+			StartCoroutine(TakeScreenshot(webcamTexture, filename));
+
+        }
+        else
+        {
+            Debug.LogError("No WebCamTexture found on WebCamDuplicate.");
+        }
 	}
 	
+	private IEnumerator TakeScreenshot(WebCamTexture webcamTexture, string filename)
+	{
+		yield return new WaitForEndOfFrame(); // Ensure the frame is fully rendered
+
+		// Create a RenderTexture
+		RenderTexture renderTexture = new RenderTexture(webcamTexture.width, webcamTexture.height, 24);
+		Graphics.Blit(webcamTexture, renderTexture);
+
+		// Read pixels from RenderTexture
+		Texture2D screenshot = new Texture2D(webcamTexture.width, webcamTexture.height, TextureFormat.RGB24, false);
+		RenderTexture.active = renderTexture;
+		screenshot.ReadPixels(new Rect(0, 0, webcamTexture.width, webcamTexture.height), 0, 0);
+		screenshot.Apply();
+
+		// Rotate the image by 90 degrees
+    	Texture2D rotatedScreenshot = RotateTexture(screenshot, true); // true = rotate clockwise
+
+		// Define file path
+		string filePath = Path.Combine(collagepath, filename);
+		
+		// Save the screenshot
+		byte[] bytes = rotatedScreenshot.EncodeToPNG();
+		File.WriteAllBytes(filePath, bytes);
+		Debug.Log("Screenshot saved at: " + filePath);
+
+		// Cleanup
+		RenderTexture.active = null;
+		renderTexture.Release();
+		Destroy(renderTexture);
+		Destroy(screenshot);
+	}
+
+	private Texture2D RotateTexture(Texture2D originalTexture, bool counterClockwise)
+	{
+		int width = originalTexture.width;
+		int height = originalTexture.height;
+		Texture2D rotatedTexture = new Texture2D(height, width); // Swap width & height
+
+		for (int x = 0; x < width; x++)
+		{
+			for (int y = 0; y < height; y++)
+			{
+				if (counterClockwise) // Rotate Counterclockwise 90°
+				{
+					rotatedTexture.SetPixel(height - 1 - y, x, originalTexture.GetPixel(x, y));
+				}
+				else // Rotate Clockwise 90°
+				{
+					rotatedTexture.SetPixel(y, width - 1 - x, originalTexture.GetPixel(x, y));
+				}
+			}
+		}
+
+		rotatedTexture.Apply();
+		return rotatedTexture;
+	}
+
+
+
 	// ======================== video ========================
 	
 	// IEnumerator onVidCapture()
