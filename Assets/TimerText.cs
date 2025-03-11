@@ -1,0 +1,35 @@
+// using System.Collections;
+// using System.Collections.Generic;
+// using UnityEngine;
+// using TMPro;
+
+
+// public class TimerText : MonoBehaviour
+// {
+	// [SerializeField]
+    // Fotomoko uifotomoko;
+
+	// public TextMeshProUGUI TimerTx;
+	
+	// // 3sec before capture
+	// int time = 3;
+	
+	// // void Start(){
+		// // uifotomoko = GameObject.FindGameObjectWithTag("TagFotomoko").GetComponent<Fotomoko>();
+	// // }
+	
+	// public void onTime(){
+		// TimerTx.text = time.ToString();
+		// time -= 1;
+		// if (time < 0) {
+			// TimerTx.text = "";
+		// }
+	// }
+	
+    // public void onTimerEnd()
+    // {
+        // uifotomoko.onCamCapture1();
+		// //Fotomoko.onCamCapture1();
+		// time = 3;
+    // }
+// }

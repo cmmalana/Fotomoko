@@ -1,0 +1,84 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System.Runtime.InteropServices;
+using UnityEngine.UI;
+using TMPro;
+
+public class WebCamTex : MonoBehaviour
+{
+
+	WebCamTexture backCam;
+
+	// mag input ng number = 0, 1, etc. para mahanap ung Snap Camera
+	// karaniwan 0 = webcam, 1 = snapcamera
+	int CameraType = 1;
+	
+	WebCamDevice[] devices;
+	
+	public GameObject MiniCam; // WebCamTextureLeft
+	public GameObject Cam2WithFrame; // WebCamTextureLeft
+	public TMP_Dropdown CamDropdown; //UiSettings/CamDropdown
+	public TMP_Dropdown CamPosDropdown; //UiSettings/CamPosDropdown
+	
+    void Start()
+    {
+		setupCam();
+		CamDropdown.value = CameraType;
+		turnCamera();
+	}
+	
+	void setupCam(){
+		if(backCam == null){
+			backCam = new WebCamTexture();
+		}
+		devices = WebCamTexture.devices;	
+		
+		CamDropdown.ClearOptions();
+		List<string> items = new List<string>();
+        for (int i = 0; i < devices.Length; i++){
+			items.Add(devices[i].name);
+		}
+		CamDropdown.AddOptions(items);
+	}
+	
+	public void turnCamera()
+    {
+        if (devices.Length > 0)
+        {
+            backCam.deviceName = devices[CameraType].name;
+			
+			GetComponent<Renderer>().material.mainTexture = backCam;
+			MiniCam.GetComponent<Renderer>().material.mainTexture = backCam;
+			Cam2WithFrame.GetComponent<Renderer>().material.mainTexture = backCam;
+			if(!backCam.isPlaying){
+				backCam.Play();
+			}
+        }
+    }
+	
+	public void SettingsCam(){
+		Debug.Log(CamDropdown.value);
+		CameraType = CamDropdown.value;
+		turnCamera();
+	}
+	
+	public void SettingsCamPos(){
+		Debug.Log(CamDropdown.value);
+		if (CamPosDropdown.value == 0){
+			transform.rotation = Quaternion.Euler(0, 180, 90);
+			MiniCam.transform.rotation = Quaternion.Euler(0, 180, 90);
+			Cam2WithFrame.transform.rotation = Quaternion.Euler(0, 180, 90);
+		}else{
+			transform.rotation = Quaternion.Euler(0, 180, 270);
+			MiniCam.transform.rotation = Quaternion.Euler(0, 180, 270);
+			Cam2WithFrame.transform.rotation = Quaternion.Euler(0, 180, 90);
+		}
+	}
+	
+	public void onRefresh(){
+		setupCam();
+	}
+   
+}

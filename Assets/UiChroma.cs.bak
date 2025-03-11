@@ -1,0 +1,57 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Video;
+
+public class UiChroma : MonoBehaviour
+{
+	// pantest lang // default -1 para hndi auto-play 
+	// change value pag gusto magplay
+	public int Int_Test = -1;
+	
+	public VideoPlayer[] Vid_Start;
+	public VideoPlayer[] Vid_End;
+	
+	int Int_Video;
+
+	Fotomoko uifotomoko;
+	
+	
+	void Start(){
+		//uifotomoko = GameObject.FindGameObjectWithTag("TagFotomoko").GetComponent<Fotomoko>();
+		for(int i = 0; i < Vid_Start.Length; i++){
+			Vid_Start[i].loopPointReached += onEndReached1;
+			Vid_End[i].loopPointReached += onEndReached2;
+		}
+	}
+	
+	// call on Fotomoko.cs
+	public void onPlayVidStart(int i){
+		Int_Video = i;
+		
+		Vid_Start[i].gameObject.SetActive(true);
+		Vid_Start[i].Play();
+		//Vid_Start[i].loopPointReached += onEndReached1;
+	}
+	
+	void onEndReached1(VideoPlayer vp){
+		uifotomoko.onTimerStart(); // call to Fotomoko.cs
+		//Fotomoko.onTimerStart();
+		//Vid_End[Int_Video].loopPointReached += onEndReached2;
+	}
+	
+	
+	// call on Fotomoko.cs
+	public void onStartVid2(){
+		Vid_End[Int_Video].gameObject.SetActive(true);
+		Vid_End[Int_Video].Play();
+		Vid_Start[Int_Video].gameObject.SetActive(false);
+		//uifotomoko.onUiCanvas1(); // call to Fotomoko.cs
+	}
+
+	void onEndReached2(VideoPlayer vp){
+		vp.gameObject.SetActive(false);
+		
+		//uifotomoko.onUiCanvas1(); // call to Fotomoko.cs
+	}
+}

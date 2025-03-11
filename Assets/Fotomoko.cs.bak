@@ -1,0 +1,520 @@
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System.IO;
+using System;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.Networking;
+using System.ComponentModel;
+// vid
+#if UNITY_EDITOR
+
+//using UnityEditor;
+
+//using UnityEditor.Recorder;
+//using UnityEditor.Recorder.Input;
+#endif
+using UnityEngine.Recorder;
+//using UnityEngine.Recorder.Input;
+using UnityEngine.Video;
+// QR
+using ZXing;
+using ZXing.QrCode;
+
+
+
+public class Fotomoko : MonoBehaviour
+{
+	public TextMeshProUGUI TimerText;
+	public GameObject TimerWhite;
+	public Image UiCanvas;
+	public Image UiCanvasCapturedImage;
+	public GameObject UiCanvasCapturedVideo;
+	public RawImage RawImageForVid;
+	public RawImage FramedPic;
+	public GameObject UiButtons;
+	public TextMeshProUGUI TextQR;
+	public TextMeshProUGUI TextDebug;
+	//public Canvas UiWaterMark;
+	public Button BtnGenQr;
+	public RawImage SupportQRCodeGenerator;
+	public Image QrLoad; // UIQr/SupportQr/QrLoading
+	public TMP_InputField FolderNameInput;
+	public Button ButtonCam;
+	public VideoPlayer ChromaVid;
+	public TextMeshProUGUI BtnFrameText;
+	public GameObject UiNoFrame;
+	public Button ButtonSelectFrame;
+	//public TextMeshProUGUI TimerTx;
+	
+	public bool isVideoOn = true;
+	public VideoClip FileCaptureMov;
+	public int VideoSeconds = 5;
+	public TextMeshProUGUI BtnVidText;
+	// public int Video1080 = 1080;
+	// public int Video1920 = 1920;
+
+
+	bool isCam = false;
+	bool isVid = false;
+	bool isFrame = true;
+	Texture2D StoreEncodedTexture;
+	Texture2D Imahe;
+	Animator CanvasAnim;
+	Animator ButtonCamAnim;
+	Animator TextAnim;
+	Animator CameraAnim;
+	Animator ButtonSelectFrameAnim;
+	string finaldate;
+	string outside_file_path;
+	string folder_name = "folder_name";
+	//string link = "https://avolutioninc.hopto.org/Fotomoko2/";
+	string link = "https://avolutionph.com/Fotomoko2/";
+	VideoPlayer videoPlayer;
+	
+	//UiChroma UICHROMA;
+	
+	// -- video
+	//RecorderController m_RecorderController;
+	public bool m_RecordAudio = true;
+	//internal MovieRecorderSettings m_Settings = null;
+	
+	
+	// ------ edit values here --------
+	//public bool IsGreenScreen = false;
+	//public int chroma_number = 0;
+
+	
+	
+	void Start(){
+		
+		TextDebug.text = "test1";
+		//UICHROMA = UiChrom.GetComponent<UiChroma>();
+		ChromaVid.gameObject.SetActive(false);
+		CanvasAnim = UiCanvas.GetComponent<Animator>();
+		CameraAnim = GetComponent<Animator>();
+		ButtonCamAnim = ButtonCam.GetComponent<Animator>();
+		TextAnim = TimerWhite.gameObject.GetComponent<Animator>();
+		ButtonSelectFrameAnim = ButtonSelectFrame.GetComponent<Animator>();
+		FramedPic.gameObject.SetActive(false);
+		
+		//videoPlayer = UiCanvasCapturedVideo.GetComponent<VideoPlayer>();
+		// frame
+		
+		// -----
+		Screen.SetResolution(1080, 1920, true);
+		BtnVidText.text = VideoSeconds + "s Video";
+		
+		StoreEncodedTexture = new Texture2D(256,256);
+		resetSettings();
+		
+		createFrame();
+	}
+	
+	
+	void resetSettings(){
+		TimerText.text = "";
+		TextDebug.text = "test";
+		UiButtons.gameObject.SetActive(true);
+		UiNoFrame.gameObject.SetActive(false);
+		//animate
+		CanvasAnim.SetBool("isUiOpen",false);
+		
+		
+	}
+	
+	
+	
+	
+	// check/create frame
+	void createFrame(){
+		string pfat = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"Fotomoko2");
+		string frame_pat = Path.Combine(pfat, "save_frame_here");
+		DirectoryInfo dir2 = Directory.CreateDirectory(frame_pat);
+		string frame1 = Path.Combine(frame_pat, "frame.jpg");
+		
+		if (File.Exists(frame1)){
+			Texture2D thisTexture = new Texture2D(1080, 1920, TextureFormat.RGB24, true);
+			Image m_Image = FramedPic.GetComponent<Image>();
+			byte[] bytes = File.ReadAllBytes(frame1);
+			
+			thisTexture.LoadImage(bytes);
+			FramedPic.GetComponent<RawImage>().texture = thisTexture;
+		}else{
+			Debug.Log("NO FRAME");
+		}
+	}
+	
+	
+	// ======================== cam click - show photo or vid ========================
+	
+	public void onCamClick(){
+		ButtonCamAnim.SetTrigger("onCamClicked");
+	}
+	
+	
+	// ======================== click photo or vid ========================
+	
+	// button camera photo
+	public void onFilterButton(){ 
+		isCam = true;
+		onButton();
+	}
+	
+	// button 5s video
+	public void onVideoButton(){
+		isVid = true;
+		onButton();
+	}
+	
+	void onButton(){
+		ButtonCamAnim.SetTrigger("onCamClickedFinished");
+		UiButtons.gameObject.SetActive(false);
+		TextAnim.SetTrigger("TimerReady");
+		TextAnim.SetTrigger("TimerStart");
+		StartCoroutine(onTime());
+	}
+	
+	// button green screen
+	// green screen - wala pa to pero gumagana basta i-call lang
+	public void onCameraButtonClick(){
+		//IsGreenScreen = true;
+		UiButtons.gameObject.SetActive(false);
+		//UICHROMA.onPlayVidStart(chroma_number); // calling to UiChroma.cs
+		TimerText.text  = "READY";
+		// TextAnim.SetTrigger("TimerReady");
+		// TextAnim.SetTrigger("TimerStart");
+	}
+	
+	
+	// start timer after mab click ng buttons
+	// call on UIChroma.cs
+	public void onTimerStart(){
+		TextAnim.SetTrigger("TimerStart");
+		//StartCoroutine(onTime());
+	}
+	
+	IEnumerator onTime(){
+		TimerText.text = "3";
+		yield return new WaitForSeconds(1);
+		TimerText.text = "2";
+		yield return new WaitForSeconds(1);
+		TimerText.text = "1";
+		yield return new WaitForSeconds(1);
+		TimerText.text = "";
+		onCamCapture1();
+	}
+	
+	// tinawag after ng onTimerStart, nag cacall sa animation
+	public void onCamCapture1(){
+		if (isCam == true) {
+			StartCoroutine(onCamCapture());
+		}else if (isVid == true){
+			//StartCoroutine(onVidCapture());
+		}
+		
+
+	}
+	
+	
+	
+	// ======================== photo ========================
+	
+	IEnumerator onCamCapture()
+    {
+		if (isFrame == true){
+			FramedPic.gameObject.SetActive(true);
+		}else{
+			UiNoFrame.gameObject.SetActive(true);
+		}
+		yield return frameEnd;
+		
+		// ------------------ file path -------------------
+		// Save inside the path
+		var dattim = System.DateTime.Now;
+		string dat = dattim.ToString("yyyyMMdd");
+		string tim2 = dattim.ToString("HHmmss");
+		finaldate = dattim.ToString(dat + "_" + tim2);
+		
+		string pic_name = finaldate + ".png";
+		string pfat = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"Fotomoko2");
+		string folder_pat = Path.Combine(pfat, folder_name);
+		string desktop_path = Path.Combine(folder_pat, pic_name);
+		
+		DirectoryInfo dir = Directory.CreateDirectory(folder_pat);
+		
+		ScreenCapture.CaptureScreenshot(desktop_path);
+		TextDebug.text = desktop_path;
+		
+		outside_file_path = desktop_path;
+		
+		// ------------------------------------------------
+		
+		// showcaptured
+		StartCoroutine(screenShot(Screen.width,Screen.height,finaldate));
+		
+		yield return frameEnd;
+		
+		FramedPic.gameObject.SetActive(false);
+		UiNoFrame.gameObject.SetActive(false);
+		
+	
+		// if filter show agad
+		onUiCanvas1();
+    }
+
+
+	public void onUiCanvas1(){
+		//animate
+		CanvasAnim.SetTrigger("OnCapture");
+		CanvasAnim.SetBool("isUiOpen",true);
+
+		RawImageForVid.gameObject.SetActive(false);
+		videoPlayer.Stop();
+		
+	}
+	
+	
+	// ======================== video ========================
+	
+	// IEnumerator onVidCapture()
+        // {
+			// if (isFrame == true){
+				// //FramedPic.gameObject.SetActive(true);
+				// ChromaVid.gameObject.SetActive(true);
+				// ChromaVid.Play();
+			// }else{
+				// UiNoFrame.gameObject.SetActive(true);
+			// }
+
+			// yield return frameEnd;
+			// // ------------------ file path -------------------
+			// // Save inside the path
+			// var dattim = System.DateTime.Now;
+			// string dat = dattim.ToString("yyyyMMdd");
+			// string tim2 = dattim.ToString("HHmmss");
+			// finaldate = dattim.ToString(dat + "_" + tim2);
+			
+			// string pic_name = finaldate;
+			// string pfat = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"Fotomoko2");
+			// string folder_pat = Path.Combine(pfat, folder_name);
+			// string folder_pat2 = Path.Combine(folder_pat, "Videos");
+			// string desktop_path = Path.Combine(folder_pat2, pic_name);
+			
+			// Directory.CreateDirectory(folder_pat);
+			// Directory.CreateDirectory(folder_pat2);
+
+			// outside_file_path = desktop_path;
+			// // ------------------------------------------------
+			
+            // var controllerSettings = ScriptableObject.CreateInstance<RecorderControllerSettings>();
+            // m_RecorderController = new RecorderController(controllerSettings);
+
+            // // Video
+            // m_Settings = ScriptableObject.CreateInstance<MovieRecorderSettings>();
+            // m_Settings.Enabled = true;
+			
+            // m_Settings.OutputFormat = MovieRecorderSettings.VideoRecorderOutputFormat.MP4;
+            // m_Settings.VideoBitRateMode = VideoBitrateMode.High;
+
+            // m_Settings.ImageInputSettings = new GameViewInputSettings
+            // {
+                // OutputWidth = 720 , // 1080 default720
+                // OutputHeight = 1280  // 1920 default1280
+            // };
+            // m_Settings.AudioInputSettings.PreserveAudio = m_RecordAudio;
+            // m_Settings.OutputFile = desktop_path;
+			
+            // controllerSettings.AddRecorderSettings(m_Settings);
+            // controllerSettings.SetRecordModeToManual();
+            // controllerSettings.FrameRate = 30.0f;
+
+            // RecorderOptions.VerboseMode = false;
+			// yield return frameEnd;
+            // m_RecorderController.PrepareRecording();
+            // m_RecorderController.StartRecording();
+
+			// // ------------------------------------------------
+			
+			
+			// // ------------------------------------------------
+			// StartCoroutine(VidCoroutine(desktop_path+".mp4"));
+        // }
+		
+		 // IEnumerator VidCoroutine(string desktop_path)
+		// {
+			// yield return new WaitForSeconds(VideoSeconds); // 5sec default
+			// m_RecorderController.StopRecording();
+			// ChromaVid.gameObject.SetActive(false);
+			// onUiCanvas1();
+			// RawImageForVid.gameObject.SetActive(true);
+			
+			// yield return new WaitForSeconds(1);
+			// FramedPic.gameObject.SetActive(false);
+			// UiNoFrame.gameObject.SetActive(false);
+			
+			
+			// videoPlayer.url = desktop_path;
+			// yield return new WaitForSeconds(3);
+			// videoPlayer.Play();
+		// }
+	
+	// ======================== ========================
+	
+	
+	WaitForEndOfFrame frameEnd = new WaitForEndOfFrame();
+	IEnumerator screenShot(int width, int height, string finaldate)
+	{
+		yield return frameEnd;
+
+		Texture2D texture = new Texture2D(width, height, TextureFormat.RGB24, true);
+		texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+		texture.LoadRawTextureData(texture.GetRawTextureData());
+		texture.Apply();
+		
+		Sprite tempSprite = Sprite.Create(texture,new Rect(0,0,width, height),new Vector2(0.5f,0.5f));
+		UiCanvasCapturedImage.gameObject.GetComponent<Image>().sprite = tempSprite;
+	}
+	
+	private Color32 [] Encode(string textForEncoding, int width, int height)
+	{
+		BarcodeWriter writer = new BarcodeWriter{
+			Format = BarcodeFormat.QR_CODE, 
+			Options = new QrCodeEncodingOptions{
+				Height = height,
+				Width = width
+			}
+		};
+		return writer.Write(textForEncoding);
+	}	
+	
+	private void onQr(string lin){
+		Color32[] _convertPixelTotexture = Encode(lin, StoreEncodedTexture.width, StoreEncodedTexture.height);
+		StoreEncodedTexture.SetPixels32(_convertPixelTotexture);
+		StoreEncodedTexture.Apply();
+		
+		SupportQRCodeGenerator.texture = StoreEncodedTexture;
+	}
+	
+	
+	// ======================== ========================
+	
+	public void _on_generateQR(){
+		//upload to server
+		if (isCam == true){
+			StartCoroutine(Upload2(finaldate + ".png"));
+		}else{
+			StartCoroutine(Upload3(finaldate + ".mp4"));
+		}
+		
+		isCam = false;
+		isVid = false;
+	}
+	
+	// photo
+	IEnumerator Upload2(string nam){
+		WWWForm form = new WWWForm();
+		form.AddBinaryData ("myimage", File.ReadAllBytes(outside_file_path), nam, "image/png");
+		form.AddField ("foldername",folder_name);
+		BtnGenQr.gameObject.SetActive(false);
+		using (UnityWebRequest w = UnityWebRequest.Post(link,form))
+		{
+			yield return w.SendWebRequest();
+			if (w.result != UnityWebRequest.Result.Success){
+				Debug.Log("Error -> "+w.error);
+				TextQR.text = w.error;
+				BtnGenQr.gameObject.SetActive(true);
+			}else{
+				onQr(link + "Images/"+folder_name+"/"+finaldate + ".png");
+				QrLoad.gameObject.SetActive(false);
+			}
+			w.Dispose();
+		}
+    }
+	
+	// video
+	IEnumerator Upload3(string nam){
+		WWWForm form = new WWWForm();
+		form.AddBinaryData ("myimage", File.ReadAllBytes(outside_file_path+".mp4"), nam);
+		form.AddField ("foldername",folder_name);
+		BtnGenQr.gameObject.SetActive(false);
+		using (UnityWebRequest w = UnityWebRequest.Post(link,form))
+		{
+			yield return w.SendWebRequest();
+			if (w.result != UnityWebRequest.Result.Success){
+				Debug.Log("Error -> "+w.error);
+				TextQR.text = w.error;
+				BtnGenQr.gameObject.SetActive(true);
+			}else{
+				onQr(link + "Images/"+folder_name+"/"+finaldate + ".mp4");
+				QrLoad.gameObject.SetActive(false);
+			}
+			w.Dispose();
+		}
+    }
+	
+	// exit preview
+	public void onNextClick(){
+		TextQR.text = "Scan Here!";
+		QrLoad.gameObject.SetActive(true);
+		BtnGenQr.gameObject.SetActive(true);
+		
+		isCam = false;
+		isVid = false;
+		
+		Destroy(Imahe);
+		resetSettings();
+	}
+	
+	
+	
+	// ======================== Button Select Filter ========================
+	
+	public void onSelectFilterButton(){
+		CameraAnim.SetBool("FilterOn",true);
+	}
+	public void onSelectFilterButtonOff(){
+		CameraAnim.SetBool("FilterOn",false);
+	}
+
+	// ======================== frame click - frame or no frame ========================
+	
+	public void onFrameClick(){
+		ButtonSelectFrameAnim.SetBool("SelectFrameB",true);
+	}
+	
+	// ======================== click frame or no frame ========================
+	
+	// button camera photo
+	public void onWithFrameButton(){ 
+		isFrame = true;
+		onButton1();
+		BtnFrameText.text = "w/ Frame";
+	}
+	
+	// button 5s video
+	public void onNoFrameButton(){
+		isFrame = false;
+		onButton1();
+		BtnFrameText.text = "No Frame";
+	}
+	
+	void onButton1(){
+		ButtonSelectFrameAnim.SetBool("SelectFrameB",false);
+	}
+
+
+	// ======================== ========================
+	// settings - Save Folder Name
+	public void onSaveFolderName(){
+		folder_name = FolderNameInput.text;
+	}
+	
+	
+	
+	// ======================== ========================
+	
+	
+}

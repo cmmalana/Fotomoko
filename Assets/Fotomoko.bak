@@ -1,0 +1,195 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System.IO;
+using UnityEngine.UI;
+using TMPro;
+//render image
+using UnityEngine.Rendering;
+// Network to connect to server
+using UnityEngine.Networking;
+// QR
+using ZXing;
+using ZXing.QrCode;
+
+
+
+public class SnapshotCamera : MonoBehaviour
+{
+	public float Timer_Val = 10;
+	public TextMeshProUGUI Timer_Text;
+	public Image UiCanvas;
+	public Image Captured_Img;
+	public Button ButtonCam;
+	public SpriteRenderer SpriteSizer;
+	public RawImage _rawImageReceiver;
+	
+	float tim_val = 0;
+	Image Img_Output;
+	Texture2D _storeEncodedTexture;
+	
+
+	
+	void Start(){
+		_storeEncodedTexture = new Texture2D(256,256);
+		resetSettings();
+	}
+	
+	bool stopUpdate = false;
+	void Update(){
+		if (!stopUpdate){
+			if (tim_val > 0){
+				tim_val -= Time.deltaTime;
+			}else{
+				tim_val = 0;
+			}
+			onDisplayTimer(tim_val);
+		}
+	}
+	
+	
+	
+	void resetSettings(){
+		Timer_Text.text = " ";
+		UiCanvas.gameObject.SetActive(false);
+		ButtonCam.gameObject.SetActive(true);
+	}
+	
+	
+	public void onCameraButtonClick(){
+		tim_val = Timer_Val;
+		stopUpdate = false;
+		ButtonCam.gameObject.SetActive(false);
+		
+	}
+	
+	private string directoryName = "Screenshots";
+    private string screenshotName = "TestImage.png";
+	void onDisplayTimer(float tim){
+		if (tim < 0){
+			stopUpdate = true;
+			
+			//onCamCapture();
+			//StartCoroutine(CoroutineSS());
+			 ScreenCapture.CaptureScreenshot("TestImage.png");
+			 Debug.Log("asdXX");
+			 
+			 // Save inside the App path
+			var dattim = System.DateTime.Now;
+			string dat = dattim.ToString("yyyyMMdd");
+			string tim2 = dattim.ToString("HHmmss");
+			string finaldate = dattim.ToString(dat+"_"+tim2);
+			string pat = Application.dataPath + "/Captures"+"/";
+			
+			string fullpath = Path.Combine(pat,finaldate);
+			
+			string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+			string screenshotPath = Path.Combine(documentsPath, Application.productName, directoryName);
+
+			DirectoryInfo screenshotDirectory = Directory.CreateDirectory(screenshotPath);
+			ScreenCapture.CaptureScreenshot(Path.Combine(screenshotDirectory.FullName, screenshotName));
+		}else{
+			float sec = Mathf.FloorToInt(tim % 60) + 1;
+			Timer_Text.text = sec.ToString();
+		}
+	}
+	
+	
+	Texture2D imahe;
+	public string link = "https://avolutioninc.hopto.org/Fotomoko2/";
+	public string folder_name = "folder_name";
+	public Camera Cam;
+	
+	void onCamCapture2()
+    {
+		// turn on uicanvas
+		UiCanvas.gameObject.SetActive(true);
+		
+		// setup capture
+        Camera Cam = GetComponent<Camera>();
+        RenderTexture currentRT = RenderTexture.active;
+        RenderTexture.active = Cam.targetTexture;
+        Cam.Render();
+        imahe = new Texture2D(Cam.targetTexture.width, Cam.targetTexture.height);
+        imahe.ReadPixels(new Rect(0, 0, Cam.targetTexture.width, Cam.targetTexture.height), 0, 0);
+        imahe.Apply();
+        RenderTexture.active = currentRT;
+        var Bytes = imahe.EncodeToPNG();
+		Sprite spr = Sprite.Create(imahe, new Rect(0, 0, imahe.width, imahe.height), new Vector2(imahe.width / 2, imahe.height / 2));
+		Captured_Img.GetComponent<Image>().sprite = spr;
+		
+		// Save inside the App path
+		var dattim = System.DateTime.Now;
+		string dat = dattim.ToString("yyyyMMdd");
+		string tim = dattim.ToString("HHmmss");
+		string finaldate = dattim.ToString(dat+"_"+tim);
+		string pat = Application.dataPath + "/Captures"+"/" + finaldate + ".png";
+		File.WriteAllBytes(pat, Bytes);
+		
+		//upload to server
+		//StartCoroutine(Upload2(pat,finaldate + ".png",Bytes));
+		
+		//generate QR
+		onQr(link + "Images/"+folder_name+"/"+finaldate + ".png");
+		
+		//animate
+		Animator anim = UiCanvas.GetComponent<Animator>();
+		anim.SetTrigger("OnCapture");
+    }
+
+
+
+
+	
+	
+	
+	
+	
+	
+	IEnumerator Upload2(string pat, string nam, byte[] Bytes)
+    {
+		WWWForm form = new WWWForm();
+		form.AddBinaryData ("myimage", Bytes, nam, "image/png");
+		form.AddField ("foldername",folder_name);
+	   
+		WWW w = new WWW (link,form);
+		yield return w;
+		if (w.error !=null){
+			Debug.Log("Error: "+w.error);
+		}else{
+			//Debug.Log(w.text);
+		}
+        w.Dispose();
+    }
+	
+	
+	
+	public void onNextClick(){
+		Destroy(imahe);
+		resetSettings();
+	}
+	
+	
+	
+	private Color32 [] Encode(string textForEncoding, int width, int height)
+	{
+		BarcodeWriter writer = new BarcodeWriter{
+			Format = BarcodeFormat.QR_CODE, 
+			Options = new QrCodeEncodingOptions{
+				Height = height,
+				Width = width
+			}
+		};
+		return writer.Write(textForEncoding);
+	}	
+	
+	private void onQr(string lin){
+		Color32[] _convertPixelTotexture = Encode(lin, _storeEncodedTexture.width, _storeEncodedTexture.height);
+		_storeEncodedTexture.SetPixels32(_convertPixelTotexture);
+		_storeEncodedTexture.Apply();
+		
+		_rawImageReceiver.texture = _storeEncodedTexture;
+	}
+	
+	
+}

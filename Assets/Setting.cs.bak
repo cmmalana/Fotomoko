@@ -1,0 +1,25 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Setting : MonoBehaviour
+{
+    bool isOPen = false;
+	
+	public GameObject Sett; // UiSettings
+	
+	void Start(){
+		Sett.gameObject.SetActive(false);
+	}
+	
+	public void onSettings(){
+		Debug.Log("click");
+		if (isOPen == true){
+			Sett.gameObject.SetActive(false);
+			isOPen = false;
+		}else{
+			Sett.gameObject.SetActive(true);
+			isOPen = true;
+		}
+	}
+}

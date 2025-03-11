@@ -1,0 +1,54 @@
+// using System;
+// using System.IO;
+// using System.Runtime.Serialization.Formatters.Binary;
+// using UnityEngine;
+
+// public class SaveManager : MonoBehaviour
+// {
+    // public static SaveManager instance {get; private set;}
+	
+	// // save here
+	// public string eventName;
+	
+	// private void Awake()
+	// {
+		// if (instance != null && instance != this)
+			// Destroy(gameObject);
+		// else
+			// instance = this;
+		
+		// DontDestroyOnLoad(gameObject);
+		// Load();
+	// }
+	
+	// public void Load(){
+		// if (File.Exists(Application.persistentDataPath + "/Settings.txt"))
+		// {
+			// BinaryFormatter bf = new BinaryFormatter();
+			// FileStream file = File.Open(Application.persistentDataPath + "/Settings.txt",FileMode.Open);
+			// PlayerData_Storage data = (PlayerData_Storage)bf.Deserialize(file);
+			
+			// eventName = data.eventName;
+			
+			// file.Close();
+		// }
+	// }
+		
+	// public void Save(){
+		// BinaryFormatter bf = new BinaryFormatter();
+		// FileStream file = File.Create(Application.persistentDataPath + "/Settings.txt");
+		// PlayerData_Storage data = new PlayerData_Storage();
+		
+		// data.eventName = eventName;
+		
+		// bf.Serialize(file, data);
+		// file.Close();
+	// }
+	
+// }
+
+// [Serializable]
+// class PlayerData_Storage
+// {
+	// public string eventName;
+// }
