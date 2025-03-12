@@ -136,6 +136,8 @@ public class Fotomoko : MonoBehaviour
 	private Animator CollageLayoutAnimation;
 	private string CollageLayouts;
 	private int count = 0;
+	public GameObject CamCaptureAnim;
+	private Animator CamCaptureAnimator;
 
 	void Awake()
 	{
@@ -159,6 +161,7 @@ public class Fotomoko : MonoBehaviour
 		createLogo();
 		createBg();
 		videoPlayer = UiCanvasCapturedVideo.GetComponent<VideoPlayer>();
+		CamCaptureAnimator = CamCaptureAnim.GetComponent<Animator>();
 		// frame
 		
 		// -----
@@ -386,6 +389,7 @@ public class Fotomoko : MonoBehaviour
 		UiButtons.gameObject.SetActive(false);
 		TextAnim.SetTrigger("TimerReady");
 		TextAnim.SetTrigger("TimerStart");
+		// CamCaptureAnimator.SetTrigger("CamReady");
 		StartCoroutine(onTime());
 	}
 	
@@ -457,28 +461,40 @@ public class Fotomoko : MonoBehaviour
 		else if (datasettings.collagevalue == 1){
 			// BgImage.gameObject.SetActive(false);
 			StartCoroutine(CaptureRoutine());
+			count = 4;
+			// WebCamDuplicateCapture("1");
+			// TextAnim.SetTrigger("CamCapture");
+
+			// for (int i = 0; i < count; i++){
+			// 	TextAnim.SetTrigger("CamCapture");
+			// }
 			
 			// string num = count.ToString();
 			// WebCamDuplicateCapture(num);
 			
-			onCamCapture1();
+			// onCamCapture1();
 		}
 	}
 
 	private IEnumerator CaptureRoutine()
 	{
 		count = 0; // Reset count if needed
+		WebCamDuplicateCapture("1");
+		// CamCaptureAnimator.SetTrigger("CamReady");
 		yield return StartCoroutine(onTimeMultiple()); // Wait for all captures
-		CollageLayout4x4(); // Build collage after all captures
+		// CollageLayout4x4(); // Build collage after all captures
 	}
 
 	IEnumerator onTimeMultiple()
 	{
-		int numCaptures = 4;
+		int numCaptures = 3;
 		for (int i = 0; i < numCaptures; i++)
 		{
 			// Play capture animation and wait
-			CanvasAnim.Play("CollageCapture");
+			// CanvasAnim.Play("CollageCapture");
+			// TextAnim.SetTrigger("TimerReady");
+			// CamCaptureAnimator.SetTrigger("CamCapture");
+			TextAnim.SetTrigger("CamCapture");
 			yield return new WaitForSeconds(1f); // Adjust based on animation length
 
 			// Determine timer duration from settings
@@ -493,10 +509,10 @@ public class Fotomoko : MonoBehaviour
 			TimerText.text = ""; // Clear timer
 
 			// Capture image
-			string num = (i + 1).ToString();
+			string num = (i + 2).ToString();
 			WebCamDuplicateCapture(num);
 
-			yield return new WaitForSeconds(0.5f); // Brief pause between captures
+			// yield return new WaitForSeconds(0.5f); // Brief pause between captures
 		}
 	}
 
@@ -704,7 +720,7 @@ public class Fotomoko : MonoBehaviour
 			webcameduplicateanimation = "CollageDuplicateInitialAnimation";
 		}
 		// webcamduplicate.Play(webcameduplicateanimation);
-		// SaveConfig();
+		SaveConfig();
 	}
 
 	public void CollageLayout4x4(){
