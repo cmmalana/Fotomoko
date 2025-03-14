@@ -209,6 +209,7 @@ public class Fotomoko : MonoBehaviour
 	public void LoadConfig(){
 
 		Directory.CreateDirectory(collagepath);
+		Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "CollageFrames"));
 
 		if (File.Exists(saveFilePath)){
 			string loadSettingsData = File.ReadAllText(saveFilePath);
@@ -266,7 +267,17 @@ public class Fotomoko : MonoBehaviour
 		// string pfat = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"Fotomoko2");
 		// string pfat = Application.dataPath;
 		string pfat = System.IO.Directory.GetCurrentDirectory();
-		string frame_pat = Path.Combine(pfat, "save_images_here");
+		// string frame_pat = Path.Combine(pfat, "save_images_here");
+
+		string frame_pat;
+
+		if (isCollage){
+			frame_pat = Path.Combine(pfat, "CollageFrames");
+		}
+		else{
+			frame_pat = Path.Combine(pfat, "save_images_here");
+		}
+
 		DirectoryInfo dir2 = Directory.CreateDirectory(frame_pat);
 		string frame1 = Path.Combine(frame_pat, "frame001.png");
 		if (File.Exists(frame1)){
@@ -324,10 +335,24 @@ public class Fotomoko : MonoBehaviour
 	
 	public void LoadImages()
 	{
+
+		Picture_Paths.Clear();
+		Picture_Paths.Add("frame0");
+    	FrameCountMax = 0;
+
 		// string pfat = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"Fotomoko2");
 		// string pfat = Application.dataPath;
 		string pfat = System.IO.Directory.GetCurrentDirectory();
-		string frame_pat = Path.Combine(pfat, "save_images_here");
+		// string frame_pat = Path.Combine(pfat, "save_images_here");
+		string frame_pat;
+
+		if (isCollage){
+			frame_pat = Path.Combine(pfat, "CollageFrames");
+		}
+		else{
+			frame_pat = Path.Combine(pfat, "save_images_here");
+		}
+
 		string filename = @"frame";
 		string fileSuffix = @".png";
 		
@@ -779,6 +804,9 @@ public class Fotomoko : MonoBehaviour
 			isCollage = true;
 			collagecount = 4;
 		}
+
+		createFrame();
+		LoadImages();
 
 		SaveConfig();
 
