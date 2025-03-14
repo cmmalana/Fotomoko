@@ -137,6 +137,7 @@ public class Fotomoko : MonoBehaviour
 	private Image [] CollageImages;
 	public Canvas Collage4x4Layout;
 	Animator fotomokologo;
+	Image TimerTextImage;
 
 	void Awake()
 	{
@@ -166,6 +167,7 @@ public class Fotomoko : MonoBehaviour
 		Collage4x4Layout = CollageLayout.GetComponentInChildren<Canvas>();
 		CollageImages = Collage4x4Layout.GetComponentsInChildren<Image>();
 		fotomokologo = UiNoFrame.GetComponent<Animator>();
+		TimerTextImage = TimerWhite.GetComponent<Image>();
 		// frame
 		
 		// -----
@@ -218,7 +220,7 @@ public class Fotomoko : MonoBehaviour
 
 		}
 		else{
-			onLoadFolderName("folder_name");
+			onLoadFolderName("folder_name"); // Initial Folder Namee
 			SaveConfig();
 		}
 	}
@@ -484,9 +486,6 @@ public class Fotomoko : MonoBehaviour
 
 	IEnumerator onTime1(){
 
-		CollageLayoutAnim.SetTrigger("CameraCapture");
-		yield return new WaitForEndOfFrame();
-
 		// Enable Mirror Function Even on Collage
 		MirrorCamDropDown();
 		onMirrorCam(); // Mirror upon last second timer
@@ -497,6 +496,9 @@ public class Fotomoko : MonoBehaviour
 		yield return new WaitForEndOfFrame();
 		ScreenCapture.CaptureScreenshot(collageimage);
 		Debug.Log(pic_name + " saved at " + collagepath);
+
+		CollageLayoutAnim.SetTrigger("CameraCapture");
+		yield return new WaitForEndOfFrame();
 
 		MirrorCamReset(); // Reset 
 
@@ -529,10 +531,6 @@ public class Fotomoko : MonoBehaviour
 				TimerText.text = "";
 			}
 
-
-			CollageLayoutAnim.SetTrigger("CameraCapture");
-			yield return new WaitForEndOfFrame();
-
 			// Enable Mirror Function
 			MirrorCamDropDown();
 			onMirrorCam(); // Mirror upon last second timer
@@ -544,6 +542,9 @@ public class Fotomoko : MonoBehaviour
 			ScreenCapture.CaptureScreenshot(collageimage);
 
 			Debug.Log(pic_name + " saved at " + collagepath);
+
+			CollageLayoutAnim.SetTrigger("CameraCapture");
+			yield return new WaitForEndOfFrame();
 
 			MirrorCamReset(); // Reset 
 		}
