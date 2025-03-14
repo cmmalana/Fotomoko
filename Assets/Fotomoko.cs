@@ -500,8 +500,10 @@ public class Fotomoko : MonoBehaviour
 
 		for (int i = 0; i < (collagecount-1); i++){
 
+			TextAnim.Play("TimerTextOff");
 			TextAnim.SetTrigger("TimerReady");
 			TextAnim.SetTrigger("TimerStart");
+
 			if (datasettings.capturetimervalue == 0){
 				TimerText.text = "5";
 				yield return new WaitForSeconds(1);
@@ -516,8 +518,6 @@ public class Fotomoko : MonoBehaviour
 				TimerText.text = "";
 			}
 			else{
-				TextAnim.Play("TimerTextReady");
-				TextAnim.SetTrigger("TimerStart");
 				TimerText.text = "3";
 				yield return new WaitForSeconds(1);
 				TimerText.text = "2";
@@ -559,7 +559,9 @@ public class Fotomoko : MonoBehaviour
 		// CollageLayoutAnim.SetTrigger("Collage4x4");
 		yield return new WaitForEndOfFrame();
 		CollageLayout4x4();
-		TextAnim.Play("TimerTextReady");
+		// TextAnim.Play("TimerTextReady");
+		TextAnim.Play("TimerTextOff");
+		TextAnim.SetTrigger("TimerReady");
 		TextAnim.SetTrigger("TimerStart");
 
 		TimerText.text = "3";
