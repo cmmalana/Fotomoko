@@ -187,6 +187,8 @@ public class WebCamTex : MonoBehaviour
 			PrintStats();
 		}
 		else{
+			settingsData.folder_name = "folder_name"; // Initial Folder Name
+			FolderNameInput.text = settingsData.folder_name;
 			saveFile();
 		}
 	}

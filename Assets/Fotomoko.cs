@@ -136,7 +136,6 @@ public class Fotomoko : MonoBehaviour
 	Animator WebCamTextureAnim;
 	private Image [] CollageImages;
 	public Canvas Collage4x4Layout;
-
 	Animator fotomokologo;
 
 	void Awake()
@@ -194,6 +193,8 @@ public class Fotomoko : MonoBehaviour
 
 		LoadConfig();
 
+		Debug.Log("Folder Name: " + folder_name);
+
 
 		createFrame();
 		LoadImages();
@@ -217,6 +218,7 @@ public class Fotomoko : MonoBehaviour
 
 		}
 		else{
+			onLoadFolderName("folder_name");
 			SaveConfig();
 		}
 	}
@@ -959,7 +961,7 @@ public class Fotomoko : MonoBehaviour
 			onQr(link + "webfotomoko.html?image=Images/" + folder_name + "/" + finaldate + ".png");
 		}
 		else{
-			onQr(link + "Images/"+folder_name+"/"+finaldate + ".png");
+			onQr(link + "Images/"+ folder_name +"/"+ finaldate + ".png");
 		}
 	}
 	

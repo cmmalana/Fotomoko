@@ -1,4 +1,4 @@
-Library: D:\FILES\Unity Projects\Fotomoko Collage Test\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
+Library: D:\FILES\Unity Projects\Fotomoko5\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
 --platform=Windows
 --backend=burst-llvm-16
 --target=X64_SSE2
@@ -68,10 +68,10 @@ Library: D:\FILES\Unity Projects\Fotomoko Collage Test\Temp\BurstOutput\Data\Plu
 --assembly-defines=mscorlib;
 --linker-options=PdbAltPath="Fotomoko 2_Data/Plugins/x86_64/lib_burst_generated.pdb"
 --generate-link-xml=Temp\burst.link.xml
---temp-folder=D:\FILES\Unity Projects\Fotomoko Collage Test\Temp\Burst
+--temp-folder=D:\FILES\Unity Projects\Fotomoko5\Temp\Burst
 --key-folder=D:/PROGRAMS/Program Files/Unity/Editor/2022.3.33f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport
---decode-folder=D:\FILES\Unity Projects\Fotomoko Collage Test\Library\Burst
---output=D:\FILES\Unity Projects\Fotomoko Collage Test\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
+--decode-folder=D:\FILES\Unity Projects\Fotomoko5\Library\Burst
+--output=D:\FILES\Unity Projects\Fotomoko5\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
 --pdb-search-paths=Temp/ManagedSymbols/
 
 --method=Unity.Burst.BurstCompiler+BurstCompilerHelper, Unity.Burst, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null::IsBurstEnabled()--8c2be93e18276203cbd918daa2748a10
@@ -174,10 +174,10 @@ Library: D:\FILES\Unity Projects\Fotomoko Collage Test\Temp\BurstOutput\Data\Plu
 --assembly-defines=mscorlib;
 --linker-options=PdbAltPath="Fotomoko 2_Data/Plugins/x86_64/lib_burst_generated.pdb"
 --generate-link-xml=Temp\burst.link.xml
---temp-folder=D:\FILES\Unity Projects\Fotomoko Collage Test\Temp\Burst
+--temp-folder=D:\FILES\Unity Projects\Fotomoko5\Temp\Burst
 --key-folder=D:/PROGRAMS/Program Files/Unity/Editor/2022.3.33f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport
---decode-folder=D:\FILES\Unity Projects\Fotomoko Collage Test\Library\Burst
---output=D:\FILES\Unity Projects\Fotomoko Collage Test\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
+--decode-folder=D:\FILES\Unity Projects\Fotomoko5\Library\Burst
+--output=D:\FILES\Unity Projects\Fotomoko5\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
 --pdb-search-paths=Temp/ManagedSymbols/
 
 --method=Unity.Burst.BurstCompiler+BurstCompilerHelper, Unity.Burst, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null::IsBurstEnabled()--8c2be93e18276203cbd918daa2748a10
