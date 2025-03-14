@@ -463,7 +463,7 @@ public class Fotomoko : MonoBehaviour
 	}
 
 	public void CaptureFunction(){
-		// 1x1
+		// Not Collage Mode
 		if (isCollage){
 			// for (int i = 0; i < (collagecount-1); i++){
 			// 	TextAnim.SetTrigger("TimerReady");
@@ -473,7 +473,7 @@ public class Fotomoko : MonoBehaviour
 			// }
 			StartCoroutine(onTime1());
 			// isCollage = false;
-		} // 4x4
+		} // Collage Mode
 		else {
 			onCamCapture1();
 		}
