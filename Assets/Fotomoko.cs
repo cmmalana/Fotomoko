@@ -136,6 +136,7 @@ public class Fotomoko : MonoBehaviour
 	Animator CollageLayoutAnim;
 	Animator WebCamTextureAnim;
 	private Image [] CollageImages;
+	public Canvas Collage2PicLayout;
 	public Canvas Collage4PicsLayout;
 	Animator fotomokologo;
 	Image TimerTextImage;
@@ -167,8 +168,7 @@ public class Fotomoko : MonoBehaviour
 		frameanimation = FramedPic.GetComponent<Animator>();
 		CollageLayoutAnim = CollageLayout.GetComponent<Animator>();
 		WebCamTextureAnim = WebCam_Texture.GetComponent<Animator>();
-		Collage4PicsLayout = CollageLayout.GetComponentInChildren<Canvas>();
-		CollageImages = Collage4PicsLayout.GetComponentsInChildren<Image>();
+		// Collage4PicsLayout = CollageLayout.GetComponentInChildren<Canvas>();
 		fotomokologo = UiNoFrame.GetComponent<Animator>();
 		TimerTextImage = TimerWhite.GetComponent<Image>();
 		InstructionsPage.gameObject.SetActive(false);
@@ -630,7 +630,7 @@ public class Fotomoko : MonoBehaviour
 		WebCamTextureAnim.SetTrigger("WebCamCollageAnim");		
 		// CollageLayoutAnim.SetTrigger("Collage4x4");
 		yield return new WaitForEndOfFrame();
-		CollageLayout4Pictures();
+		CollageLayoutPictures();
 		// TextAnim.Play("TimerTextReady");
 		TextAnim.Play("TimerTextOff");
 		TextAnim.SetTrigger("TimerReady");
@@ -683,11 +683,27 @@ public class Fotomoko : MonoBehaviour
 	}
 
 	// Update CollageLayout4Pictures to use coroutine
-	public void CollageLayout4Pictures(){
-		StartCoroutine(LoadCollageImagesAsync());
+	public void CollageLayoutPictures(){
+		
+		if (collagecount == 2){
+			CollageImages = Collage2PicLayout.GetComponentsInChildren<Image>();
+			StartCoroutine(LoadCollageImagesAsync2());
+		}
+		else if (collagecount == 3){
+
+		}
+		else if (collagecount == 4){
+			CollageImages = Collage4PicsLayout.GetComponentsInChildren<Image>();
+			StartCoroutine(LoadCollageImagesAsync4());
+		}
 	}
 
-	IEnumerator LoadCollageImagesAsync(){
+	IEnumerator LoadCollageImagesAsync2(){
+		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture1.png"), CollageImages[0]));
+		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture2.png"), CollageImages[1]));
+	}
+
+	IEnumerator LoadCollageImagesAsync4(){
 		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture1.png"), CollageImages[0]));
 		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture2.png"), CollageImages[1]));
 		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture3.png"), CollageImages[2]));
@@ -871,6 +887,8 @@ public class Fotomoko : MonoBehaviour
 		}
 		else if (datasettings.collagevalue == 1){
 			isCollage = true;
+			Collage2PicLayout.gameObject.SetActive(true);
+			Collage4PicsLayout.gameObject.SetActive(false);
 			collagecount = 2;
 			InitialCollagePos();
 		}
@@ -881,6 +899,8 @@ public class Fotomoko : MonoBehaviour
 		}
 		else if (datasettings.collagevalue == 3){
 			isCollage = true;
+			Collage2PicLayout.gameObject.SetActive(false);
+			Collage4PicsLayout.gameObject.SetActive(true);
 			collagecount = 4;
 			InitialCollagePos();
 		}
