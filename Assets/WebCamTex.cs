@@ -54,7 +54,6 @@ public class WebCamTex : MonoBehaviour
 	public Dropdown QRDropDown;
 	public Button Print;
 	public Dropdown PrintButtonStatus;
-	
 	string saveFilePath;
 	
 	void Awake()
@@ -93,18 +92,33 @@ public class WebCamTex : MonoBehaviour
 		CamDropdown.AddOptions(items);
 	}
 	
-	public void turnCamera()
-    {
-        if (devices.Length > 0)
-        {
-            backCam.deviceName = devices[CameraType].name;
+	// public void turnCamera()
+    // {
+    //     if (devices.Length > 0)
+    //     {
+    //         backCam.deviceName = devices[CameraType].name;
 			
-			GetComponent<Renderer>().material.mainTexture = backCam;
-			MiniCam.GetComponent<Renderer>().material.mainTexture = backCam;
-			Cam2WithFrame.GetComponent<Renderer>().material.mainTexture = backCam;
-			if(!backCam.isPlaying){
-				backCam.Play();
-			}
+	// 		GetComponent<Renderer>().material.mainTexture = backCam;
+	// 		MiniCam.GetComponent<Renderer>().material.mainTexture = backCam;
+	// 		Cam2WithFrame.GetComponent<Renderer>().material.mainTexture = backCam;
+	// 		if(!backCam.isPlaying){
+	// 			backCam.Play();
+	// 		}
+    //     }
+    // }
+
+    public void turnCamera()
+    {
+        if (backCam != null && backCam.isPlaying)
+            backCam.Stop();
+
+        if (devices.Length > 0 && CameraType < devices.Length)
+        {
+            backCam = new WebCamTexture(devices[CameraType].name);
+            GetComponent<Renderer>().material.mainTexture = backCam;
+            MiniCam.GetComponent<Renderer>().material.mainTexture = backCam;
+            Cam2WithFrame.GetComponent<Renderer>().material.mainTexture = backCam;
+            backCam.Play();
         }
     }
 
@@ -140,6 +154,7 @@ public class WebCamTex : MonoBehaviour
 	}
 	
 	public void onRefresh(){
+		SettingsCam();
 		setupCam();
 	}
    

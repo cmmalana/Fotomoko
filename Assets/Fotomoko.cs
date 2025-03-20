@@ -131,13 +131,16 @@ public class Fotomoko : MonoBehaviour
 	bool isCollage = false;
 	int collagecount;
 	string collagepath;
+	string collagepath1;
 	public RawImage CollageLayout;
 	Animator CollageLayoutAnim;
 	Animator WebCamTextureAnim;
 	private Image [] CollageImages;
-	public Canvas Collage4x4Layout;
+	public Canvas Collage4PicsLayout;
 	Animator fotomokologo;
 	Image TimerTextImage;
+	String CollageFramePath;
+	public Image InstructionsPage;
 
 	void Awake()
 	{
@@ -164,10 +167,11 @@ public class Fotomoko : MonoBehaviour
 		frameanimation = FramedPic.GetComponent<Animator>();
 		CollageLayoutAnim = CollageLayout.GetComponent<Animator>();
 		WebCamTextureAnim = WebCam_Texture.GetComponent<Animator>();
-		Collage4x4Layout = CollageLayout.GetComponentInChildren<Canvas>();
-		CollageImages = Collage4x4Layout.GetComponentsInChildren<Image>();
+		Collage4PicsLayout = CollageLayout.GetComponentInChildren<Canvas>();
+		CollageImages = Collage4PicsLayout.GetComponentsInChildren<Image>();
 		fotomokologo = UiNoFrame.GetComponent<Animator>();
 		TimerTextImage = TimerWhite.GetComponent<Image>();
+		InstructionsPage.gameObject.SetActive(false);
 		// frame
 		
 		// -----
@@ -210,6 +214,7 @@ public class Fotomoko : MonoBehaviour
 
 		Directory.CreateDirectory(collagepath);
 		Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "CollageFrames"));
+		StartCoroutine(CollageFolderFrame());
 
 		if (File.Exists(saveFilePath)){
 			string loadSettingsData = File.ReadAllText(saveFilePath);
@@ -221,8 +226,18 @@ public class Fotomoko : MonoBehaviour
 
 		}
 		else{
-			onLoadFolderName("folder_name"); // Initial Folder Namee
+			onLoadFolderName("folder_name"); // Initial Folder Name
 			SaveConfig();
+		}
+	}
+
+	IEnumerator CollageFolderFrame(){
+		CollageFramePath = Path.Combine(Directory.GetCurrentDirectory(), "CollageFrames");
+
+		for (int i = 2; i <= 4; i++){
+			collagepath1 = Path.Combine(CollageFramePath, "Collage" + i);
+			Directory.CreateDirectory(collagepath1);
+			yield return new WaitForEndOfFrame();
 		}
 	}
 
@@ -272,7 +287,9 @@ public class Fotomoko : MonoBehaviour
 		string frame_pat;
 
 		if (isCollage){
-			frame_pat = Path.Combine(pfat, "CollageFrames");
+			// frame_pat = Path.Combine(pfat, "CollageFrames");
+			frame_pat = Path.Combine(CollageFramePath, "Collage" + collagecount);
+			Debug.Log("FRAME PATH: " + frame_pat);
 		}
 		else{
 			frame_pat = Path.Combine(pfat, "save_images_here");
@@ -295,6 +312,27 @@ public class Fotomoko : MonoBehaviour
 			UiNoFrame.gameObject.SetActive(true);
 		}
 	}
+
+	public void ResetCollagePos(){
+		if (isCollage){
+			RectTransform rect4 = Collage4PicsLayout.GetComponent<RectTransform>(); // for 4 pics
+			rect4.offsetMin = new Vector2(rect4.offsetMin.x, 0); // bottom
+			rect4.offsetMax = new Vector2(rect4.offsetMax.x, 0); // top
+			rect4.localScale = new Vector3(1,1,1); // reset scale to 1
+			// rect4.localScale = Vector3.one;
+			// CollageLayoutAnim.Play("CollageAnimation4x4Pause");
+			// CollageLayoutAnim.SetTrigger("CollageLayoutBack");
+		}
+	}
+
+	public void InitialCollagePos(){
+
+		// 4 pictures initial layout
+		RectTransform rect4 = Collage4PicsLayout.GetComponent<RectTransform>(); // for 4 pics
+		rect4.offsetMin = new Vector2(rect4.offsetMin.x, -90); // bottom
+		rect4.offsetMax = new Vector2(rect4.offsetMax.x, -90); // top
+		rect4.localScale = new Vector3(0.78f,0.78f,0.78f); // reset scale to 1
+	}
 	
 	void createBg(){
 		// string pfat = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"Fotomoko2");
@@ -316,6 +354,7 @@ public class Fotomoko : MonoBehaviour
 	void selectFrame(int selectedFrame){
 		string fullFilename = Picture_Paths[selectedFrame].ToString();
 		if (File.Exists(fullFilename)){
+			InitialCollagePos();
 			FramedPic.gameObject.SetActive(true);
 			Texture2D thisTexture = new Texture2D(1080, 1920, TextureFormat.RGB24, true);
 			Image m_Image = FramedPic.GetComponent<Image>();
@@ -327,6 +366,7 @@ public class Fotomoko : MonoBehaviour
 			FramedPic.GetComponent<RawImage>().texture = null;
 			FramedPic.gameObject.SetActive(false);
 			UiNoFrame.gameObject.SetActive(true);
+			ResetCollagePos();
 		}
 	}
 	
@@ -347,7 +387,8 @@ public class Fotomoko : MonoBehaviour
 		string frame_pat;
 
 		if (isCollage){
-			frame_pat = Path.Combine(pfat, "CollageFrames");
+			// frame_pat = Path.Combine(pfat, "CollageFrames");
+			frame_pat = Path.Combine(CollageFramePath, "Collage" + collagecount);
 		}
 		else{
 			frame_pat = Path.Combine(pfat, "save_images_here");
@@ -442,6 +483,9 @@ public class Fotomoko : MonoBehaviour
 	}
 	
 	IEnumerator onTime(){
+
+		CollageLayoutAnim.Play("CollageAnimationInitial");
+
 		if (IsGreenScreen == true){
 			UICHROMA.onPlayVidStart(chroma_number); // calling to UiChroma
 		}
@@ -523,6 +567,7 @@ public class Fotomoko : MonoBehaviour
 		Debug.Log(pic_name + " saved at " + collagepath);
 
 		CollageLayoutAnim.SetTrigger("CameraCapture");
+		// CollageLayoutAnim.Play("CameraCaptureAnimStart");
 		yield return new WaitForEndOfFrame();
 
 		MirrorCamReset(); // Reset 
@@ -581,12 +626,11 @@ public class Fotomoko : MonoBehaviour
 	}
 
 	IEnumerator onTime2(){
-
 		frameanimation.SetTrigger("FrameBack");
 		WebCamTextureAnim.SetTrigger("WebCamCollageAnim");		
 		// CollageLayoutAnim.SetTrigger("Collage4x4");
 		yield return new WaitForEndOfFrame();
-		CollageLayout4x4();
+		CollageLayout4Pictures();
 		// TextAnim.Play("TimerTextReady");
 		TextAnim.Play("TimerTextOff");
 		TextAnim.SetTrigger("TimerReady");
@@ -603,28 +647,52 @@ public class Fotomoko : MonoBehaviour
 		onCamCapture1();
 	}
 
-	public void CollageLayout4x4(){
-		CollageImages[0].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture1.png"));
-		CollageImages[1].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture2.png"));
-		CollageImages[2].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture3.png"));
-		CollageImages[3].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture4.png"));
+	// public void CollageLayout4Pictures(){
+	// 	CollageImages[0].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture1.png"));
+	// 	CollageImages[1].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture2.png"));
+	// 	CollageImages[2].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture3.png"));
+	// 	CollageImages[3].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture4.png"));
+	// }
+
+	// Sprite LoadSpriteFromPath(string path)
+    // {
+    //     if (File.Exists(path))
+    //     {
+    //         byte[] fileData = File.ReadAllBytes(path);
+    //         Texture2D texture = new Texture2D(2, 2);
+    //         texture.LoadImage(fileData);
+    //         return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+    //     }
+    //     else
+    //     {
+    //         Debug.LogError($"File at {path} not found.");
+    //         return null;
+    //     }
+    // }
+
+	IEnumerator LoadSpriteAsync(string path, Image targetImage) {
+		string filePath = "file://" + path;
+		using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(filePath)) {
+			yield return uwr.SendWebRequest();
+			if (uwr.result == UnityWebRequest.Result.Success) {
+				Texture2D texture = DownloadHandlerTexture.GetContent(uwr);
+				// Resize texture if necessary
+				targetImage.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.one * 0.5f);
+			}
+		}
 	}
 
-	Sprite LoadSpriteFromPath(string path)
-    {
-        if (File.Exists(path))
-        {
-            byte[] fileData = File.ReadAllBytes(path);
-            Texture2D texture = new Texture2D(2, 2);
-            texture.LoadImage(fileData);
-            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-        }
-        else
-        {
-            Debug.LogError($"File at {path} not found.");
-            return null;
-        }
-    }
+	// Update CollageLayout4Pictures to use coroutine
+	public void CollageLayout4Pictures(){
+		StartCoroutine(LoadCollageImagesAsync());
+	}
+
+	IEnumerator LoadCollageImagesAsync(){
+		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture1.png"), CollageImages[0]));
+		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture2.png"), CollageImages[1]));
+		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture3.png"), CollageImages[2]));
+		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture4.png"), CollageImages[3]));
+	}
 
 	public void CaptureTimerValue(){
 		datasettings.capturetimervalue = CaptureTimer.value;
@@ -799,17 +867,43 @@ public class Fotomoko : MonoBehaviour
 
 		if (datasettings.collagevalue == 0){
 			isCollage = false;
+			InitialCollagePos();
+		}
+		else if (datasettings.collagevalue == 1){
+			isCollage = true;
+			collagecount = 2;
+			InitialCollagePos();
+		}
+		else if (datasettings.collagevalue == 2){
+			isCollage = true;	
+			collagecount = 3;
+			InitialCollagePos();
+		}
+		else if (datasettings.collagevalue == 3){
+			isCollage = true;
+			collagecount = 4;
+			InitialCollagePos();
 		}
 		else{
 			isCollage = true;
-			collagecount = 4;
+			// collagecount = 4;
 		}
+
+		Debug.Log("COLLAGE DROPDOWN VALUE: " + (datasettings.collagevalue+1));
 
 		createFrame();
 		LoadImages();
 
 		SaveConfig();
 
+	}
+
+	public void onShowInstructionsButton(){
+		InstructionsPage.gameObject.SetActive(true);
+	}
+
+	public void onBackInstructionsButton(){
+		InstructionsPage.gameObject.SetActive(false);
 	}
 	
 	// ======================== video ========================
@@ -1077,6 +1171,7 @@ public class Fotomoko : MonoBehaviour
 		if (isCollage){
 			WebCamTextureAnim.Play("WebCamTextureBackAnim");
 			fotomokologo.SetTrigger("FotomokoLogoInital");
+			CollageLayoutAnim.Play("CollageAnimationInitial");
 		}
 
 		MirrorCamReset(); // Reset Camera para di pa rin nakamirror pag binalik 
