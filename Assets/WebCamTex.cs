@@ -69,11 +69,18 @@ public class WebCamTex : MonoBehaviour
 		CamDropdown.value = CameraType;
 		turnCamera();
 
-		string pfat = System.IO.Directory.GetCurrentDirectory();
-		string frame_pat = Path.Combine(pfat, "save_images_here");
+		string pfat = Directory.GetCurrentDirectory();
+		string frame_pat = Path.Combine(pfat, "FotomokoConfigs");
 		string pat = Path.Combine(frame_pat, "webcamsettings.json");
 		saveFilePath = pat;
 		//Debug.Log(saveFilePath);
+
+		// Para gumawa ng folder named "FotomokoConfigs"
+		string configDirectory = Path.Combine(Directory.GetCurrentDirectory(), "FotomokoConfigs");
+		if (!Directory.Exists(configDirectory))
+		{
+			Directory.CreateDirectory(configDirectory);
+		}
 		
 		loadFile();
 	}

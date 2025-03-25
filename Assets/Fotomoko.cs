@@ -136,7 +136,8 @@ public class Fotomoko : MonoBehaviour
 	Animator CollageLayoutAnim;
 	Animator WebCamTextureAnim;
 	private Image [] CollageImages;
-	public Canvas Collage2PicLayout;
+	public Canvas Collage2PicsLayout;
+	public Canvas Collage3PicsLayout;
 	public Canvas Collage4PicsLayout;
 	Animator fotomokologo;
 	Image TimerTextImage;
@@ -190,16 +191,23 @@ public class Fotomoko : MonoBehaviour
 
 		datasettings = new DataSettings();
 		
-		string pfat = System.IO.Directory.GetCurrentDirectory();
-		string frame_pat = Path.Combine(pfat, "save_images_here");
+		string pfat = Directory.GetCurrentDirectory();
+		string frame_pat = Path.Combine(pfat, "FotomokoConfigs");
 		string pat = Path.Combine(frame_pat, "fotomokosettings.json");
 		saveFilePath = pat;
 
 		collagepath = Path.Combine(pfat, "CollagePictures");
 
+		string configDirectory = Path.Combine(Directory.GetCurrentDirectory(), "FotomokoConfigs");
+
+		if (!Directory.Exists(configDirectory))
+		{
+			Directory.CreateDirectory(configDirectory);
+		}
+
 		LoadConfig();
 
-		Debug.Log("Folder Name: " + folder_name);
+		CollageDropdownFunction();
 
 
 		createFrame();
@@ -212,8 +220,9 @@ public class Fotomoko : MonoBehaviour
 
 	public void LoadConfig(){
 
+		CollageFramePath = Path.Combine(Directory.GetCurrentDirectory(), "CollageFrames");
 		Directory.CreateDirectory(collagepath);
-		Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "CollageFrames"));
+		Directory.CreateDirectory(CollageFramePath);
 		StartCoroutine(CollageFolderFrame());
 
 		if (File.Exists(saveFilePath)){
@@ -232,7 +241,6 @@ public class Fotomoko : MonoBehaviour
 	}
 
 	IEnumerator CollageFolderFrame(){
-		CollageFramePath = Path.Combine(Directory.GetCurrentDirectory(), "CollageFrames");
 
 		for (int i = 2; i <= 4; i++){
 			collagepath1 = Path.Combine(CollageFramePath, "Collage" + i);
@@ -647,29 +655,6 @@ public class Fotomoko : MonoBehaviour
 		onCamCapture1();
 	}
 
-	// public void CollageLayout4Pictures(){
-	// 	CollageImages[0].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture1.png"));
-	// 	CollageImages[1].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture2.png"));
-	// 	CollageImages[2].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture3.png"));
-	// 	CollageImages[3].sprite = LoadSpriteFromPath(Path.Combine(collagepath, "Picture4.png"));
-	// }
-
-	// Sprite LoadSpriteFromPath(string path)
-    // {
-    //     if (File.Exists(path))
-    //     {
-    //         byte[] fileData = File.ReadAllBytes(path);
-    //         Texture2D texture = new Texture2D(2, 2);
-    //         texture.LoadImage(fileData);
-    //         return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-    //     }
-    //     else
-    //     {
-    //         Debug.LogError($"File at {path} not found.");
-    //         return null;
-    //     }
-    // }
-
 	IEnumerator LoadSpriteAsync(string path, Image targetImage) {
 		string filePath = "file://" + path;
 		using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(filePath)) {
@@ -686,11 +671,12 @@ public class Fotomoko : MonoBehaviour
 	public void CollageLayoutPictures(){
 		
 		if (collagecount == 2){
-			CollageImages = Collage2PicLayout.GetComponentsInChildren<Image>();
+			CollageImages = Collage2PicsLayout.GetComponentsInChildren<Image>();
 			StartCoroutine(LoadCollageImagesAsync2());
 		}
 		else if (collagecount == 3){
-
+			CollageImages = Collage3PicsLayout.GetComponentsInChildren<Image>();
+			StartCoroutine(LoadCollageImagesAsync3());
 		}
 		else if (collagecount == 4){
 			CollageImages = Collage4PicsLayout.GetComponentsInChildren<Image>();
@@ -701,6 +687,12 @@ public class Fotomoko : MonoBehaviour
 	IEnumerator LoadCollageImagesAsync2(){
 		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture1.png"), CollageImages[0]));
 		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture2.png"), CollageImages[1]));
+	}
+
+	IEnumerator LoadCollageImagesAsync3(){
+		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture1.png"), CollageImages[0]));
+		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture2.png"), CollageImages[1]));
+		yield return StartCoroutine(LoadSpriteAsync(Path.Combine(collagepath, "Picture3.png"), CollageImages[2]));
 	}
 
 	IEnumerator LoadCollageImagesAsync4(){
@@ -883,23 +875,31 @@ public class Fotomoko : MonoBehaviour
 
 		if (datasettings.collagevalue == 0){
 			isCollage = false;
+			Collage2PicsLayout.gameObject.SetActive(false);
+			Collage3PicsLayout.gameObject.SetActive(false);
+			Collage4PicsLayout.gameObject.SetActive(false);
 			InitialCollagePos();
 		}
 		else if (datasettings.collagevalue == 1){
 			isCollage = true;
-			Collage2PicLayout.gameObject.SetActive(true);
+			Collage2PicsLayout.gameObject.SetActive(true);
+			Collage3PicsLayout.gameObject.SetActive(false);
 			Collage4PicsLayout.gameObject.SetActive(false);
 			collagecount = 2;
 			InitialCollagePos();
 		}
 		else if (datasettings.collagevalue == 2){
 			isCollage = true;	
+			Collage2PicsLayout.gameObject.SetActive(false);
+			Collage3PicsLayout.gameObject.SetActive(true);
+			Collage4PicsLayout.gameObject.SetActive(false);
 			collagecount = 3;
 			InitialCollagePos();
 		}
 		else if (datasettings.collagevalue == 3){
 			isCollage = true;
-			Collage2PicLayout.gameObject.SetActive(false);
+			Collage2PicsLayout.gameObject.SetActive(false);
+			Collage3PicsLayout.gameObject.SetActive(false);
 			Collage4PicsLayout.gameObject.SetActive(true);
 			collagecount = 4;
 			InitialCollagePos();
