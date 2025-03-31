@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 
@@ -11,10 +12,12 @@ public class Setting : MonoBehaviour
 	
 	public GameObject UiSettings; // UiSettings
 	public GameObject SettingsPasswordTx; // UiSettings
+	public Toggle LocalIPAddToggle;
 	
 	void Start(){
 		UiSettings.gameObject.SetActive(false);
 		SettingsPasswordTx.gameObject.SetActive(false);
+		LocalIPAddToggle.gameObject.SetActive(false);
 	}
 	
 	public void onSettings(){
@@ -22,10 +25,12 @@ public class Setting : MonoBehaviour
 		if (isOPen == true){
 			SettingsPasswordTx.gameObject.SetActive(false);
 			UiSettings.gameObject.SetActive(false);
+			LocalIPAddToggle.gameObject.SetActive(true);
 			isOPen = false;
 		}else{
 			SettingsPasswordTx.gameObject.SetActive(true);
 			UiSettings.gameObject.SetActive(true);
+			LocalIPAddToggle.gameObject.SetActive(false);
 			isOPen = true;
 		}
 	}
@@ -34,6 +39,7 @@ public class Setting : MonoBehaviour
 		//Debug.Log("click");
 		if (pw == "7"){
 			SettingsPasswordTx.gameObject.SetActive(false);
+			LocalIPAddToggle.gameObject.SetActive(true);
 		}
 		pw = "";
 	}

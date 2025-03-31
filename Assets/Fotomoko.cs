@@ -17,6 +17,9 @@ using ZXing;
 using ZXing.QrCode;
 using System.Data;
 using System.Threading;
+using System.Net;
+using System.Net.Sockets;
+using UnityEngine.SocialPlatforms;
 // Video
 // using System.Linq;
 // using UnityEngine.Windows.WebCam;
@@ -25,6 +28,7 @@ public class DataSettings{
 	public int capturetimervalue;
 	public int cammirrorvalue;
 	public int collagevalue;
+	public bool isLocalIP;
 }
 
 
@@ -143,6 +147,8 @@ public class Fotomoko : MonoBehaviour
 	Image TimerTextImage;
 	String CollageFramePath;
 	public Image InstructionsPage;
+	public Toggle LocalIPToggle;
+	string PublicIPAdd;
 
 	void Awake()
 	{
@@ -232,6 +238,7 @@ public class Fotomoko : MonoBehaviour
 			CaptureTimer.value = datasettings.capturetimervalue;
 			CamMirror.value = datasettings.cammirrorvalue;
 			Collage.value = datasettings.collagevalue;
+			LocalIPToggle.isOn = datasettings.isLocalIP;
 
 		}
 		else{
@@ -1064,6 +1071,14 @@ public class Fotomoko : MonoBehaviour
 	
 	// photo
 	IEnumerator Upload2(string nam){
+
+		if (datasettings.isLocalIP){
+			link = "http://" + PublicIPAdd + "/fotomoko/";
+		}
+		else{
+			link = link_default;
+		}
+
 		WWWForm form = new WWWForm();
 		form.AddBinaryData ("myimage", File.ReadAllBytes(outside_file_path), nam, "image/png");
 		form.AddField ("foldername",folder_name);
@@ -1080,31 +1095,65 @@ public class Fotomoko : MonoBehaviour
 				}
 				BtnGenQr.gameObject.SetActive(true);
 			}else{
-				if (local_ip != ""){
-					onQr(local_ip + "Images/"+folder_name+"/"+finaldate + ".png");
-				}else{
+				// if (local_ip != ""){
+				// 	print(local_ip + "Images/"+folder_name+"/"+finaldate + ".png");
+				// 	onQr(local_ip + "Images/"+folder_name+"/"+finaldate + ".png");
+				// }else{
 
-					// // Old Link
-					// onQr(link + "Images/"+folder_name+"/"+finaldate + ".png");
+				// 	// // Old Link
+				// 	// onQr(link + "Images/"+folder_name+"/"+finaldate + ".png");
 
-					// // New Link
-					// onQr(link + "webfotomoko.html?image=Images/" + folder_name + "/" + finaldate + ".png");
+				// 	// // New Link
+				// 	// onQr(link + "webfotomoko.html?image=Images/" + folder_name + "/" + finaldate + ".png");
 
-					QRLinkDropdown(QRDropDown.value);
-				}
+				// 	QRLinkDropdown(QRDropDown.value);
+				// }
+
+
+				QRLinkDropdown(QRDropDown.value);
+
 				QrLoad.gameObject.SetActive(false);
 			}
 			w.Dispose();
 		}
     }
 
+	public void localIPToggle(){
+		if (LocalIPToggle.isOn){
+			GetLocalIPAddress();
+			print("IP ADDRESS: " + "http://" + PublicIPAdd + "/fotomoko/");
+		}
+		else{
+			print("SERVER ADDRESS USE");
+		}
+		datasettings.isLocalIP = LocalIPToggle.isOn;
+		print("LOCAL IP TOGGLE: " + datasettings.isLocalIP);
+		SaveConfig();
+	}
+
+	string GetLocalIPAddress()
+    {
+        PublicIPAdd = "Not Found";
+        foreach (var ip in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                PublicIPAdd = ip.ToString();
+                break;
+            }
+        }
+        return PublicIPAdd;
+    }
+
 	// QR Link Drop Down
 	private void QRLinkDropdown(int index){
 		if (index == 0){
 			onQr(link + "webfotomoko.html?image=Images/" + folder_name + "/" + finaldate + ".png");
+			print(link + "webfotomoko.html?image=Images/" + folder_name + "/" + finaldate + ".png");
 		}
 		else{
 			onQr(link + "Images/"+ folder_name +"/"+ finaldate + ".png");
+			print(link + "Images/"+ folder_name +"/"+ finaldate + ".png");
 		}
 	}
 	

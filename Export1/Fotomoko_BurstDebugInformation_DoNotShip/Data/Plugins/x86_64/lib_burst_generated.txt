@@ -10,7 +10,7 @@ Library: D:\FILES\Unity Projects\Fotomoko5\Temp\BurstOutput\Data\Plugins\x86_64\
 --linker-options=PdbAltPath="Fotomoko_Data/Plugins/x86_64/lib_burst_generated.pdb"
 --generate-link-xml=Temp\burst.link.xml
 --temp-folder=D:\FILES\Unity Projects\Fotomoko5\Temp\Burst
---key-folder=D:/PROGRAMS/Program Files/Unity/Editor/6000.0.40f1-x86_64/Editor/Data/PlaybackEngines/WindowsStandaloneSupport
+--key-folder=D:/PROGRAMS/Program Files/Unity/Editor/6000.0.43f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport
 --decode-folder=D:\FILES\Unity Projects\Fotomoko5\Library\Burst
 --output=D:\FILES\Unity Projects\Fotomoko5\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
 --pdb-search-paths=Temp/ManagedSymbols/
@@ -70,7 +70,7 @@ Library: D:\FILES\Unity Projects\Fotomoko5\Temp\BurstOutput\Data\Plugins\x86_64\
 --linker-options=PdbAltPath="Fotomoko_Data/Plugins/x86_64/lib_burst_generated.pdb"
 --generate-link-xml=Temp\burst.link.xml
 --temp-folder=D:\FILES\Unity Projects\Fotomoko5\Temp\Burst
---key-folder=D:/PROGRAMS/Program Files/Unity/Editor/6000.0.40f1-x86_64/Editor/Data/PlaybackEngines/WindowsStandaloneSupport
+--key-folder=D:/PROGRAMS/Program Files/Unity/Editor/6000.0.43f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport
 --decode-folder=D:\FILES\Unity Projects\Fotomoko5\Library\Burst
 --output=D:\FILES\Unity Projects\Fotomoko5\Temp\BurstOutput\Data\Plugins\x86_64\lib_burst_generated
 --pdb-search-paths=Temp/ManagedSymbols/
