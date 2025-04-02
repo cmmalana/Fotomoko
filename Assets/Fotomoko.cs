@@ -20,6 +20,7 @@ using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine.SocialPlatforms;
+using UnityEditor;
 // Video
 // using System.Linq;
 // using UnityEngine.Windows.WebCam;
@@ -149,6 +150,8 @@ public class Fotomoko : MonoBehaviour
 	public Image InstructionsPage;
 	public Toggle LocalIPToggle;
 	string PublicIPAdd;
+	string desktop_path;
+	string local_loc;
 
 	void Awake()
 	{
@@ -750,7 +753,7 @@ public class Fotomoko : MonoBehaviour
 		string pic_name = finaldate + ".png";
 		string pfat = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"Fotomoko2");
 		string folder_pat = Path.Combine(pfat, folder_name);
-		string desktop_path = Path.Combine(folder_pat, pic_name);
+		desktop_path = Path.Combine(folder_pat, pic_name);
 		
 		DirectoryInfo dir = Directory.CreateDirectory(folder_pat);
 
@@ -774,6 +777,23 @@ public class Fotomoko : MonoBehaviour
 		onUiCanvas1();
     }
 
+	// IEnumerator FileCopy(string destination){
+	// 	FileCopy(destination, Environment.CurrentDirectory);
+	// 	yield return null;
+	// }
+	IEnumerator FileCopy(string sourcePath, string destinationPath)
+	{
+		try
+		{
+			File.Copy(sourcePath, Path.Combine(destinationPath, Path.GetFileName(sourcePath)), true);
+		}
+		catch (Exception e)
+		{
+			Debug.LogError("Error copying file: " + e.Message);
+		}
+		yield return null;
+	}
+
 
 	public void onUiCanvas1(){
 		//animate
@@ -786,8 +806,11 @@ public class Fotomoko : MonoBehaviour
 		// Kuha bagong screenshot and gawing print.png
 		string desktop_path2 = Path.Combine(Environment.CurrentDirectory, "print.png");
 		ScreenCapture.CaptureScreenshot(desktop_path2);
-		// Print.gameObject.SetActive(printbutton); // Visibility ng print button depending on the config in settings
-		// Debug.Log("Fotomoko.cs Printbutton stat: " + printbutton);
+
+		// Copy yung file and imove sa xampp folder pag naka on yung local ip
+		if (datasettings.isLocalIP){
+			StartCoroutine(FileCopy(desktop_path, local_loc));
+		}
 	}
 
 	public void MirrorCamDropDown(){
@@ -882,13 +905,15 @@ public class Fotomoko : MonoBehaviour
 
 		if (datasettings.collagevalue == 0){
 			isCollage = false;
-			Collage2PicsLayout.gameObject.SetActive(false);
-			Collage3PicsLayout.gameObject.SetActive(false);
-			Collage4PicsLayout.gameObject.SetActive(false);
+			// Collage2PicsLayout.gameObject.SetActive(false);
+			// Collage3PicsLayout.gameObject.SetActive(false);
+			// Collage4PicsLayout.gameObject.SetActive(false);
+			CollageLayout.gameObject.SetActive(false);
 			InitialCollagePos();
 		}
 		else if (datasettings.collagevalue == 1){
 			isCollage = true;
+			CollageLayout.gameObject.SetActive(true);
 			Collage2PicsLayout.gameObject.SetActive(true);
 			Collage3PicsLayout.gameObject.SetActive(false);
 			Collage4PicsLayout.gameObject.SetActive(false);
@@ -897,6 +922,7 @@ public class Fotomoko : MonoBehaviour
 		}
 		else if (datasettings.collagevalue == 2){
 			isCollage = true;	
+			CollageLayout.gameObject.SetActive(true);
 			Collage2PicsLayout.gameObject.SetActive(false);
 			Collage3PicsLayout.gameObject.SetActive(true);
 			Collage4PicsLayout.gameObject.SetActive(false);
@@ -905,6 +931,7 @@ public class Fotomoko : MonoBehaviour
 		}
 		else if (datasettings.collagevalue == 3){
 			isCollage = true;
+			CollageLayout.gameObject.SetActive(true);
 			Collage2PicsLayout.gameObject.SetActive(false);
 			Collage3PicsLayout.gameObject.SetActive(false);
 			Collage4PicsLayout.gameObject.SetActive(true);
@@ -1122,6 +1149,7 @@ public class Fotomoko : MonoBehaviour
 		if (LocalIPToggle.isOn){
 			GetLocalIPAddress();
 			print("IP ADDRESS: " + "http://" + PublicIPAdd + "/fotomoko/");
+			local_loc = Path.Combine("C:", "xampp", "htdocs", "fotomoko", "Images", "folder_name");
 		}
 		else{
 			print("SERVER ADDRESS USE");
