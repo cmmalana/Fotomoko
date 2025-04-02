@@ -1073,7 +1073,7 @@ public class Fotomoko : MonoBehaviour
 	IEnumerator Upload2(string nam){
 
 		if (datasettings.isLocalIP){
-			link = "http://" + PublicIPAdd + "/fotomoko/";
+			link = "http://localhost/fotomoko/";
 		}
 		else{
 			link = link_default;
@@ -1147,6 +1147,13 @@ public class Fotomoko : MonoBehaviour
 
 	// QR Link Drop Down
 	private void QRLinkDropdown(int index){
+		if (datasettings.isLocalIP){
+			link = "http://" + PublicIPAdd + "/fotomoko/";
+		}
+		else{
+			link = link_default;
+		}
+
 		if (index == 0){
 			onQr(link + "webfotomoko.html?image=Images/" + folder_name + "/" + finaldate + ".png");
 			print(link + "webfotomoko.html?image=Images/" + folder_name + "/" + finaldate + ".png");
